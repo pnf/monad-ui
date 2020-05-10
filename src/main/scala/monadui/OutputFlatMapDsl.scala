@@ -26,5 +26,27 @@ object OutputFlatMapDsl {
       else output.withValue(None, HashMap.empty)
     }
     def withFilter(f: T => Boolean): Output[T] = filter(f)
+
+    def ap2[U](o2: Output[U]): Output[(T, U)] = {
+      val w = Output.mergeMultiMap(output.written, o2.written)
+      (output, o2) match {
+        case (Output(Some(v1), _), Output(Some(v2), _)) ⇒
+          new Output(Some((v1, v2)), w)
+        case _ ⇒
+          new Output(None, w)
+      }
+    }
+  }
+
+  object RichOutput {
+    def ap2[T1, T2](o1: Output[T1], o2: Output[T2]): Output[(T1,T2)] = {
+      val w = Output.mergeMultiMap(o1.written, o2.written)
+      (o1, o2) match {
+        case (Output(Some(v1), _), Output(Some(v2), _)) ⇒
+          new Output(Some((v1, v2)), w)
+        case _ ⇒
+          new Output(None, w)
+      }
+    }
   }
 }
